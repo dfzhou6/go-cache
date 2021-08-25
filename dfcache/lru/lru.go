@@ -2,7 +2,7 @@ package lru
 
 import "container/list"
 
-type Cache struct {
+type LRU struct {
 	maxBytes  int64
 	curBytes  int64
 	linkList  *list.List
@@ -14,14 +14,14 @@ type Value interface {
 	Len() int
 }
 
-// The inner struct of the Cache
+// The inner struct of the LRU
 type entry struct {
 	key string
 	val Value
 }
 
-// Add item to the Cache
-func (c *Cache) Add(key string, val Value) {
+// Add item to the LRU
+func (c *LRU) Add(key string, val Value) {
 	if ele, ok := c.linkMap[key]; ok {
 		c.linkList.MoveToFront(ele)
 		en := ele.Value.(*entry)
@@ -39,8 +39,8 @@ func (c *Cache) Add(key string, val Value) {
 	}
 }
 
-// Remove the oldest item from the Cache
-func (c *Cache) RemoveOldest() {
+// Remove the oldest item from the LRU
+func (c *LRU) RemoveOldest() {
 	ele := c.linkList.Back()
 	if ele == nil {
 		return
@@ -57,8 +57,8 @@ func (c *Cache) RemoveOldest() {
 	c.OnEvicted(en.key, en.val)
 }
 
-// Get item from the Cache
-func (c *Cache) Get(key string) (val Value, ok bool) {
+// Get item from the LRU
+func (c *LRU) Get(key string) (val Value, ok bool) {
 	if ele, ok := c.linkMap[key]; ok {
 		c.linkList.MoveToFront(ele)
 		en := ele.Value.(*entry)
@@ -68,13 +68,13 @@ func (c *Cache) Get(key string) (val Value, ok bool) {
 }
 
 // Get the number of the linklist entries
-func (c *Cache) Len() int {
+func (c *LRU) Len() int {
 	return c.linkList.Len()
 }
 
-// New the instance of the Cache
-func New(maxBytes int64, onEvicted func(string, Value)) *Cache {
-	return &Cache{
+// New the instance of the LRU
+func New(maxBytes int64, onEvicted func(string, Value)) *LRU {
+	return &LRU{
 		maxBytes:  maxBytes,
 		linkList:  list.New(),
 		linkMap:   make(map[string]*list.Element),
